@@ -1,0 +1,96 @@
+-- builder
+-- Kody Brown <kodybrown@gmail.com>, Mar 21, 2012
+
+-- builder <height> [forward|0]
+
+local a = { ... }
+local modem = "left"
+
+local t = tonumber(a[1])
+local height = 0
+local forward = 0
+local heightBuilt = 0 
+local blocks = ""
+local MAX = 128
+local MAXFORWARD = 64
+
+if #a == 0 then
+ height = MAX
+elseif #a > 0 then
+ if a[1] == "-" then
+  height = MAX
+ else
+  height = tonumber(a[1])
+  if height > MAX then
+   height = MAX
+  end
+ end
+ if #a > 1 then
+  forward = tonumber( a[2] )
+  if forward > MAXFORWARD then
+   forward = MAXFORWARD
+  elseif forward < 0 then
+   forward = 0
+  end
+ end
+end
+
+if height == 0 then
+ print( "missing height (arg1)" )
+ return
+end
+
+-- Methods
+
+local function selectNext( start )
+ start = tonumber( start )
+ for i = start, 9 do
+  if t.getItemCount( i ) > 0 then
+	t.select( i )
+	return
+  end
+ end
+end
+
+send = function(computer, command)
+ rednet.send(computer, command)
+
+ repeat
+  computer, result = rednet.receive()
+ until result == "ok"
+ if result ~= "ok" then
+  print("**error: " .. result)
+ end
+end
+
+
+rednet.open(modem)
+
+
+heightBuilt = 0
+
+for x = 1, height do
+ if t.detectUp() then
+  t.digUp()
+ end
+ t.up()
+ selectNext( 1 )
+ t.placeDown()
+ if forward > 0 then
+  for y = 1, forward do
+   if t.detect() then
+    t.dig()
+   end
+	t.forward()
+	if t.detectDown() then
+    t.digDown()
+   end
+   selectNext( 1 )
+	t.placeDown()
+  end
+  t.turnLeft()
+  t.turnLeft()
+ end
+ heightBuilt = heightBuilt + 1
+end
+

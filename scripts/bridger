@@ -1,0 +1,134 @@
+local cx = 0
+local cy = 0
+local cz = 0
+local cdir = 1
+local t = turtle
+
+local l = 0
+local r = 0
+
+local a = { ... }
+local len = 0
+
+if #a > 0 then
+ len = a[1]
+else
+ print( "arg1 required: length of bridge" )
+ return
+end
+
+local function findWidth()
+ local w = 1
+ local i = 0
+
+ print( "determining width" )
+
+ print( "discovering blocks on the left" )
+ t.turnLeft()
+ while t.detectDown() do
+  t.forward()
+  i = i + 1
+ end
+ l = i - 1
+ print( "blocks to the left: " .. l )
+ -- go back
+ t.turnLeft()
+ t.turnLeft()
+ for j = 1, i do
+  t.forward()
+ end
+
+ print( "discovering blocks on the right" )
+ i = 0
+ while t.detectDown() do
+  t.forward()
+  i = i + 1
+ end
+ r = i - 1
+ print( "number of blocks to the right: " .. r )
+ 
+ -- go back
+ t.turnLeft()
+ t.turnLeft()
+ for j = 1, i do
+  t.forward()
+ end
+ t.turnRight()
+
+end
+
+local function calcRequired()
+ return len * ( l + 1 + r )
+end
+
+local function countBlocks()
+ local cnt = 0
+ for i = 1, 9 do
+  cnt = cnt + t.getItemCount( i )
+ end
+ return cnt
+end
+
+local function selectNext()
+ for i = 1, 9 do
+  if t.getItemCount( i ) > 0 then
+	t.select( i )
+	return
+  end
+ end
+end
+
+local function layBridge()
+ t.forward()
+ selectNext()
+ t.placeDown()
+ 
+ if l > 0 then
+  t.turnLeft()
+  for x = 1, l do
+   t.forward()
+   selectNext()
+   t.placeDown()
+  end
+  -- go back
+  t.turnLeft()
+  t.turnLeft()
+  for j = 1, l do
+   t.forward()
+  end
+  
+  if r == 0 then
+	t.turnLeft()
+  end
+ end
+ 
+ if r > 0 then
+  if l == 0 then
+	t.turnRight()
+  end
+
+  for x = 1, r do
+   t.forward()
+   selectNext()
+   t.placeDown()
+  end
+  t.turnLeft()
+  t.turnLeft()
+  for j = 1, r do
+   t.forward()
+  end
+  t.turnRight()
+ end
+end
+
+
+findWidth()
+
+if calcRequired() > countBlocks() then
+ print( "not enough blocks present" )
+ return
+end
+
+for x = 1, len do
+ layBridge()
+end

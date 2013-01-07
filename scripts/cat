@@ -1,0 +1,44 @@
+
+-- cat (lists the contents of the file specifed)
+-- Kody Brown <kodybrown@gmail.com>, Mar 19, 2012
+
+local t = turtle
+local a = { ... }
+local nl = "\n"
+local filename
+local wrap = true
+local w, h
+
+if #a ~= 1 then
+ print( "Usage: cat <filename>" )
+ return
+end
+
+filename = shell.resolve( a[1] )
+
+if wrap == false then
+ w = 9999
+else
+ w, h = term.getSize()
+end
+
+-- print( "f="..filename )
+-- print( "wrap=".. tostring(wrap) )
+-- print( "w="..w )
+-- print( "h="..h )
+
+
+local file,err = io.open( filename )
+if err then
+ print( err )
+ return
+end
+
+for line in file:lines( filename ) do
+ if line == nil then
+  break
+ end
+ print( line )
+end
+
+file:close()
