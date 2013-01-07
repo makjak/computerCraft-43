@@ -1,0 +1,37 @@
+local a = {...}
+local modem = "left"
+local device = 0
+
+local t = tonumber(a[1])
+local direction = "forward"
+local distance = 1
+
+if #a > 1 then
+ direction = a[2]
+end
+if #a > 2 then
+ distance = tonumber(a[3])
+end
+
+send = function(device, command)
+ rednet.send(device, command)
+ 
+ repeat
+  d, result = rednet.receive(10)
+ until d == device
+
+ if d ~= device then
+  print("**timeout occurred")
+  return
+ end
+ if result ~= "ok" then
+  print("**error: " .. result)
+ end
+end
+
+rednet.open(modem)
+
+for x = 1, distance do
+ send(t, direction)
+end
+

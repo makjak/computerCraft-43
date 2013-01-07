@@ -1,0 +1,93 @@
+-- digger1
+-- This turtle code will dig down a[1] blocks then place blocks
+-- down all the way back up.
+-- Kody Brown <kodybrown@gmail.com>, Mar 19, 2012
+
+local t = turtle
+local a = { ... }
+local depth = 0
+local depthDug = 0 
+local startInvBlock = 1
+local blocks = ""
+local MAX = 9999
+
+if #a == 0 then
+ depth = MAX
+elseif #a > 0 then
+ if a[1] == "-" then
+  depth = MAX
+ else
+  depth = tonumber( a[1] )
+  if depth > MAX then
+   depth = MAX
+  end
+ end
+end
+
+if #a > 1 then
+ startInvBlock = tonumber( a[2] )
+end
+if startInvBlock < 1 or startInvBlock > 9 then
+ print( "starting inventory block is out of range" )
+ return
+end
+
+for x = startInvBlock, 9 do
+ if #blocks > 0 then
+  blocks = blocks .. ","
+ end
+ blocks = blocks .. "#" .. x
+end
+
+local function countBlocks( start )
+ start = tonumber( start )
+ local cnt = 0
+ for i = start, 9 do
+  cnt = cnt + t.getItemCount( i )
+ end
+ return cnt
+end
+
+local function selectNext( start )
+ start = tonumber( start )
+ for i = start, 9 do
+  if t.getItemCount( i ) > 0 then
+	t.select( i )
+	return
+  end
+ end
+end
+
+-- Starting..
+
+if depth == 0 then
+ print( "missing depth (arg1)" )
+ return
+elseif depth < MAX then
+ if depth > (64 * (9 - startInvBlock + 1)) then
+  print( "cannot dig more than inventory blocks (" .. blocks .. ") can hold" )
+  return
+ elseif depth > countBlocks( startInvBlock ) then
+  print( "inventory blocks (" .. blocks .. ") do not have enough blocks in them" )
+  return
+ end
+end
+
+depthDug = 0
+
+for x = 1, depth do
+ if t.detectDown() then
+  if t.digDown() == false then
+	break
+  end
+ end
+ t.down()
+ depthDug = depthDug + 1
+end
+
+for y = 1, depthDug do
+ t.up()
+ selectNext( startInvBlock )
+ t.placeDown()
+end
+

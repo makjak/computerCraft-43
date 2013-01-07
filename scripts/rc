@@ -1,0 +1,211 @@
+
+local t = turtle
+local a = {...}
+local modem = "right"
+local cmd = ""
+local slot = 1
+local computer = 0
+local result = "ok"
+
+startsWith = function(self, piece)
+ return string.sub(self, 1, string.len(piece)) == piece
+end
+
+trim = function(s)
+ return string.gsub(s, "^%s*(.-)%s*$", "%1")
+end
+
+split = function(pString, pPattern)
+ local Table = {}
+ local fpat = "(.-)" .. pPattern
+ local last_end = 1
+ local s, e, cap = pString:find(fpat, 1)
+ 
+ while s do
+  if s ~= 1 or cap ~= "" then
+   table.insert(Table,cap)
+  end
+  last_end = e+1
+  s, e, cap = pString:find(fpat, last_end)
+ end
+
+ if last_end <= #pString then
+  cap = pString:sub(last_end)
+  table.insert(Table, cap)
+ end
+
+ return Table
+end
+
+selectNext = function(start)
+ start = tonumber(start)
+ for i = start, 9 do
+  if t.getItemCount(i) > 0 then
+	t.select(i)
+	return
+  end
+ end
+end
+
+getCommandValue = function(cmd, key)
+ return tonumber(trim(string.sub(cmd, string.len(key) + 1, string.len(cmd))))
+end
+
+print( "This is computer #"..os.getComputerID() )
+
+local label = os.getComputerLabel()
+if label then
+	print( "This computer is labelled \""..label.."\"" )
+end
+
+rednet.open(modem)
+
+while 1 == 1 do
+ result = "ok"
+ computer, command = rednet.receive()
+ --print("computer='" .. computer .. "'")
+ --print("command='" .. command .. "'")
+ 
+ commandarray = split(command, "\n")
+ 
+ for i = 1, #commandarray do
+  cmd = commandarray[i]
+  --print("cmd='" .. cmd .. "'")
+  
+  if cmd == "forward" then
+   if not t.forward() then
+    result = "blocked"
+   end
+  elseif startsWith(cmd, "forward") then
+   for x = 1, getCommandValue(cmd, "forward") do
+    if not t.forward() then
+     result = "blocked"
+     break
+    end
+   end
+ 
+  elseif cmd == "back" then
+   if not t.back() then
+    result = "blocked"
+   end
+  elseif startsWith(cmd, "back") then
+   for x = 1, getCommandValue(cmd, "back") do
+    if not t.back() then
+     result = "blocked"
+     break
+    end
+   end
+ 
+  elseif cmd == "left" then
+   t.turnLeft()
+  elseif startsWith(cmd, "left") then
+   for x = 1, getCommandValue(cmd, "left") do
+    t.left()
+   end
+ 
+  elseif cmd == "right" then
+   t.turnRight()
+  elseif startsWith(cmd, "right") then
+   for x = 1, getCommandValue(cmd, "right") do
+    t.right()
+   end
+ 
+  elseif cmd == "up" then
+   if not t.up() then
+    result = "blocked"
+   end
+  elseif startsWith(cmd, "up") then
+   for x = 1, getCommandValue(cmd, "up") do
+    if not t.up() then
+     result = "blocked"
+     break
+    end
+   end
+ 
+  elseif cmd == "down" then
+   if t.detectDown() then
+    rednet.send(computer, "blocked")
+   else
+    if not t.down() then
+     result = "blocked"
+    end
+   end
+  elseif startsWith(cmd, "down") then
+   for x = 1, getCommandValue(cmd, "down") do
+    if not t.down() then
+     result = "blocked"
+     break
+    end
+   end
+ 
+  elseif cmd == "placeUp" then
+   selectNext(slot)
+   t.placeUp()
+  elseif startsWith(cmd, "placeUp") then
+   selectNext(getCommandValue(cmd, "placeUp"))
+   t.placeUp()
+ 
+  elseif cmd == "placeDown" then
+   selectNext(slot)
+   t.placeDown()
+  elseif startsWith(cmd, "placeDown") then
+   selectNext(getCommandValue(cmd, "placeDown"))
+   t.placeDown()
+ 
+  elseif cmd == "place" then
+   selectNext(slot)
+   t.place()
+  elseif startsWith(cmd, "place") then
+   selectNext(getCommandValue(cmd, "place"))
+   t.place()
+ 
+  elseif cmd == "digUp" then
+   if t.detectUp() then
+    t.digUp()
+   end
+  elseif startsWith(cmd, "digUp") then
+   for x = 1, getCommandValue(cmd, "digUp") do
+    if t.detect() then
+     t.dig()
+    end
+   end
+ 
+  elseif cmd == "digDown" then
+   if t.detectDown() then
+    t.digDown()
+   end
+  elseif startsWith(cmd, "digDown") then
+   for x = 1, getCommandValue(cmd, "digDown") do
+    if t.detect() then
+     t.dig()
+    end
+   end
+ 
+  elseif cmd == "dig" then
+   if t.detect() then
+    t.dig()
+   end
+  elseif startsWith(cmd, "dig") then
+   for x = 1, getCommandValue(cmd, "dig") do
+    if t.detect() then
+     t.dig()
+    end
+   end
+ 
+  elseif cmd == "select" then
+   slot = 1
+   t.select(slot)
+  elseif startsWith(cmd, "select") then
+   slot = getCommandValue(cmd, "select")
+   t.select(slot)
+ 
+  elseif cmd == "quit" then
+   print("quiting..")
+   rednet.send(computer, "ok")
+   return
+  end
+ end -- end for
+ 
+ rednet.send(computer, result)
+end
+

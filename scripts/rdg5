@@ -1,0 +1,71 @@
+-- reverse digger/builder
+-- goes until it finds a block in its way, places blocks from inventory
+-- the whole way back!
+-- Kody Brown <kodybrown@gmail.com>, Apr 4, 2012
+
+-- rdg5 <forward|-> [startInvBlock|1]
+
+local t = turtle
+local a = { ... }
+local forward = 0
+local startInvBlock = 1
+local MAXFORWARD = 9999
+local movedCount = 0
+
+if #a == 0 then
+ forward = MAXFORWARD
+end
+
+if #a > 0 then
+ forward = tonumber( a[1] )
+ if forward > MAXFORWARD then
+  forward = MAXFORWARD
+ elseif forward < 1 then
+  print( "invalid arg1" )
+  return
+ end
+end
+
+if #a > 1 then
+ startInvBlock = tonumber( a[2] )
+end
+
+-- Functions
+
+local function selectNext( start )
+ start = tonumber( start )
+ for i = start, 9 do
+  if t.getItemCount( i ) > 0 then
+	t.select( i )
+	return
+  end
+ end
+end
+
+-- Starting..
+
+for y = 1, forward do
+ if t.forward() == false then
+  break
+ end
+ movedCount = movedCount + 1
+end
+
+for y = 1, movedCount do
+ while t.back() == false do
+  t.turnLeft()
+  t.turnLeft()
+  while t.detect() do
+   if t.dig() == false then
+    print( "Can not dig item..?" )
+ 	 return
+   end
+	sleep( 0.25 )
+  end
+  t.turnLeft()
+  t.turnLeft()
+  sleep( 0.25 )
+ end
+ selectNext( startInvBlock )
+ t.place()
+end

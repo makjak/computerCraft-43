@@ -1,0 +1,144 @@
+-- digger4
+-- digs down + forward and places blocks on the way up (placement is like dg2)
+-- Kody Brown <kodybrown@gmail.com>, Mar 19, 2012
+
+-- dg4 <depth|0|-> <forward|0> [rndInvBlock|1] [startInvBlock|2]
+
+local t = turtle
+local a = { ... }
+local depth = 0
+local forward = 0
+local depthDug = 0 
+local rndInvBlock = 1
+local startInvBlock = 2
+local blocks = ""
+local MAX = 9999
+local MAXFORWARD = 120
+
+local index = 0
+local minRnd = 2
+local maxRnd = 9
+local cnt = 0
+
+math.randomseed(os.time())
+
+if #a == 0 then
+ depth = MAX
+elseif #a > 0 then
+ if a[1] == "-" then
+  depth = MAX
+ else
+  depth = tonumber( a[1] )
+  if depth > MAX then
+   depth = MAX
+  end
+ end
+end
+
+if #a > 1 then
+ forward = tonumber( a[2] )
+ if forward > MAXFORWARD then
+  forward = MAXFORWARD
+ elseif forward < 0 then
+  forward = 0
+ end
+end
+
+if #a > 2 then
+ rndInvBlock = tonumber( a[3] )
+end
+
+if #a > 3 then
+ startInvBlock = tonumber( a[4] )
+end
+
+if rndInvBlock > startInvBlock then
+ rndInvBlock = startInvBlock - 1
+end
+
+-- Functions
+
+local function countBlocks( start )
+ start = tonumber( start )
+ local cnt = 0
+ for i = start, 9 do
+  cnt = cnt + t.getItemCount( i )
+ end
+ return cnt
+end
+
+local function selectNext( start )
+ start = tonumber( start )
+ for i = start, 9 do
+  if t.getItemCount( i ) > 0 then
+	t.select( i )
+	return
+  end
+ end
+end
+
+local function placeBlock()
+ if cnt <= 0 then
+  t.select( rndInvBlock )
+  cnt = math.random(minRnd, maxRnd)
+ else
+  selectNext( startInvBlock )
+  cnt = cnt - 1
+ end
+ t.placeDown()
+end
+
+-- Starting..
+
+-- print( "depth=" .. depth )
+-- print( "forward=" .. forward )
+-- print( "rndInvBlock=" .. rndInvBlock )
+-- print( "startInvBlock=" .. startInvBlock )
+
+if depth == 0 then
+ print( "missing depth (arg1)" )
+ return
+end
+
+depthDug = 0
+
+-- digging
+
+for x = 1, depth do
+ if t.detectDown() then
+  if t.digDown() == false then
+	break
+  end
+ end
+ t.down()
+ if forward > 0 then
+  for y = 1, forward do
+   if t.detect() then
+    t.dig()
+   end
+	t.forward()
+  end
+  t.turnLeft()
+  t.turnLeft()
+ end
+ depthDug = depthDug + 1
+end
+
+-- placing
+
+for y = 1, depthDug do
+ --if t.detectUp() then
+ -- break
+ --end
+ t.up()
+ placeBlock()
+ if forward > 0 then
+  for y = 1, forward do
+	t.forward()
+   placeBlock()
+  end
+  t.turnLeft()
+  t.turnLeft()
+ end
+end
+

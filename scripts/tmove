@@ -1,0 +1,45 @@
+
+-- Usage: tmove direction turtle-id [distance [&]]
+
+local a = {...}
+local direction = a[1]
+local t = tonumber(a[2])
+local detach = false
+local modem = "left"
+local distance = 1
+
+if #a > 2 then
+ distance = tonumber(a[3])
+end
+if #a > 3 and a[4] == "&" then
+ detach = true
+end
+
+if direction ~= "forward" and direction ~= "back" and direction ~= "up" and direction ~= "down" then
+ print("direction must be forward, back, up, or down.")
+ return
+end
+
+send = function(computer, command, keepTrying)
+ rednet.send(computer, command)
+ repeat
+  computer, result = rednet.receive()
+ until computer == t
+ if result == "blocked" and keepTrying then
+  send(computer, command, keepTrying)
+ elseif result ~= "ok" then
+  print("**error: " .. result)
+  return false
+ end
+ return true
+end
+
+rednet.open(modem)
+
+if detach then
+ send(t, direction .. " " .. distance)
+else
+ for x = 1, distance do
+  send(t, direction, true)
+ end
+end

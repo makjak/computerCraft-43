@@ -1,0 +1,77 @@
+-- reverse digger/builder
+-- Kody Brown <kodybrown@gmail.com>, Apr 4, 2012
+
+-- rdg5 <forward|-> [startInvBlock|1]
+
+local t = turtle
+local a = { ... }
+local forward = 0
+local startInvBlock = 1
+local MAXFORWARD = 120
+
+if #a == 0 then
+ forward = MAXFORWARD
+end
+
+if #a > 0 then
+ forward = tonumber( a[1] )
+ if forward > MAXFORWARD then
+  forward = MAXFORWARD
+ elseif forward < 0 then
+  forward = 0
+ end
+end
+
+if #a > 1 then
+ startInvBlock = tonumber( a[2] )
+end
+
+-- Functions
+
+local function selectNext( start )
+ start = tonumber( start )
+ for i = start, 9 do
+  if t.getItemCount( i ) > 0 then
+	t.select( i )
+	return
+  end
+ end
+end
+
+-- Starting..
+
+if forward == 0 then
+ print( "missing forward (arg1)" )
+ return
+end
+
+for y = 1, forward do
+ while t.forward() == false do
+  if t.detect() then
+   if t.dig() == false then
+    print( "Can not dig item..?" )
+ 	 return
+   end
+  end
+  sleep( 0.10 )
+ end
+end
+
+for y = 1, forward do
+ while t.back() == false do
+  t.turnLeft()
+  t.turnLeft()
+  while t.detect() do
+   if t.dig() == false then
+    print( "Can not dig item..?" )
+ 	 return
+   end
+	sleep( 0.25 )
+  end
+  t.turnLeft()
+  t.turnLeft()
+  sleep( 0.25 )
+ end
+ t.select( startInvBlock )
+ t.place()
+end

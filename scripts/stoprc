@@ -1,0 +1,6 @@
+local a = {...}
+local t = tonumber(a[1])
+local modem = "left"
+
+rednet.open(modem)
+rednet.send(t, "quit")

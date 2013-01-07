@@ -1,0 +1,8 @@
+
+local a = { ... }
+if #a ~= 1 then
+	print( "Usage: rm <path>" )
+	return
+end
+
+shell.run( "delete", ... )

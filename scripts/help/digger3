@@ -1,0 +1,12 @@
+digger3 will dig straight down as far as arg1(number) specifies or until it reaches bedrock. It then randomly picks a block from inventory locations 4 (default) to 9 and places it down as it moves back up to the starting point.
+
+This is especially useful when making a stone wall with a lot of variation of blocks.
+
+ex:
+"digger3 10 8" will dig 10 blocks down (or reaches bedrock) and randomly places a block from inventory blocks 8 or 9 as it moves up.
+"digger3 64 9" will dig 64 blocks down (or reaches bedrock) and randomly places a block from inventory block 9 as it moves up. No random blocks.
+"digger3 - 4" will dig until it reaches the bedrock and randomly place blocks from inventory blocks 4 through 9 as it moves up.
+
+author:
+kody brown <kodybrown@gmail.com>
+March 19, 2012

@@ -1,0 +1,38 @@
+local a = {...}
+local t = tonumber(a[1])
+local distance = 1
+local modem = "left"
+local direction = "left"
+
+if #a > 1 then
+ distance = tonumber(a[2])
+end
+if #a > 2 then
+ direction = a[3]
+end
+
+if direction ~= "left" and direction ~= "right" then
+ print("direction must be left or right")
+ return
+end
+
+wait = function()
+ repeat
+  err, result = rednet.receive()
+ until result == "ok"
+end
+
+rednet.open(modem)
+
+for x = 1, distance do
+ rednet.send(t, direction)
+ wait()
+ rednet.send(t, "forward")
+ wait()
+ if direction == "left" then
+  rednet.send(t, "right")
+ else
+  rednet.send(t, "left")
+ end
+ wait()
+end

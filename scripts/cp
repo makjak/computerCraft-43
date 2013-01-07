@@ -1,0 +1,8 @@
+
+local a = { ... }
+if #a ~= 2 then
+	print( "Usage: cp <source> <destination>" )
+	return
+end
+
+shell.run( "copy", ... )

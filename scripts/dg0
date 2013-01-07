@@ -1,0 +1,68 @@
+-- digger0
+-- Kody Brown <kodybrown@gmail.com>, Mar 19, 2012
+
+-- dg0 <depth|0|-> <forward|0>
+
+local t = turtle
+local a = { ... }
+local depth = 0
+local forward = 0
+local depthDug = 0 
+local blocks = ""
+local MAX = 9999
+local MAXFORWARD = 120
+
+if #a == 0 then
+ depth = MAX
+elseif #a > 0 then
+ if a[1] == "-" then
+  depth = MAX
+ else
+  depth = tonumber( a[1] )
+  if depth > MAX then
+   depth = MAX
+  end
+ end
+ if #a > 1 then
+  forward = tonumber( a[2] )
+  if forward > MAXFORWARD then
+   forward = MAXFORWARD
+  elseif forward < 0 then
+   forward = 0
+  end
+ end
+end
+
+-- Starting..
+
+if depth == 0 then
+ print( "missing depth (arg1)" )
+ return
+end
+
+depthDug = 0
+
+for x = 1, depth do
+ if t.detectDown() then
+  if t.digDown() == false then
+	break
+  end
+ end
+ t.down()
+ if forward > 0 then
+  for y = 1, forward do
+   if t.detect() then
+    t.dig()
+   end
+	t.forward()
+  end
+  t.turnLeft()
+  t.turnLeft()
+ end
+ depthDug = depthDug + 1
+end
+
+for y = 1, depthDug do
+ t.up()
+end
+

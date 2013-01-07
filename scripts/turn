@@ -1,0 +1,68 @@
+
+-- Usage: turn turtle-id direction
+
+local a = {...}
+local t = tonumber(a[1])
+local detach = (a[#a] == "&")
+local modem = "left"
+local direction = "left"
+local step = 90
+
+if #a > 1 then
+ direction = a[2]
+end
+
+if direction ~= "right" and direction ~= "left" and direction ~= "around" 
+  and direction ~= "90" and direction ~= "180" and direction ~= "270" and direction ~= "360" 
+  and direction ~= "-90" and direction ~= "-180" and direction ~= "-270" and direction ~= "-360" then
+ print("invalid direction: must be left, right, around, or 90/180/270/360.")
+ return
+end
+if direction == "right" then
+ direction = "90"
+elseif direction == "left" then
+ direction = "-90"
+elseif direction == "around" then
+ direction = "180"
+end
+direction = tonumber(direction)
+if direction < 0 then
+ step = -90
+end
+
+send = function(computer, command, keepTrying)
+ rednet.send(computer, command)
+ repeat
+  computer, result = rednet.receive()
+ until computer == t
+ if result == "blocked" and keepTrying then
+  send(computer, command, keepTrying)
+ elseif result ~= "ok" then
+  print("**error: " .. result)
+  return false
+ end
+ return true
+end
+
+rednet.open(modem)
+
+if detach then
+ commands = ""
+ for x = 1, direction, step do
+  if step < 0 then
+   commands = commands .. "\n" .. "left"
+  else
+   commands = commands .. "\n" .. "right"
+  end
+ end
+ send(t, commands)
+else
+ for x = 1, direction, step do
+  if step < 0 then
+   send(t, "left")
+  else
+   send(t, "right")
+  end
+ end
+end
+

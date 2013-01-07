@@ -1,0 +1,4 @@
+
+-- Usage: backup turtle-id [distance [&]]
+
+shell.run("tmove", "forward", ... )

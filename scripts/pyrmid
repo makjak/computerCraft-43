@@ -1,0 +1,71 @@
+local a = {...}
+local modem = "left"
+local computer = 0
+
+local t = tonumber(a[1])
+local distance = tonumber(a[2])
+local slot = 1
+local index = 0
+
+if #a > 2 then
+ slot = tonumber(a[3])
+end
+
+wait = function()
+ repeat
+  err, result = rednet.receive()
+ until result == "ok"
+end
+
+send = function(computer, command)
+ rednet.send(computer, command)
+ 
+ computer, result = rednet.receive()
+ if result ~= "ok" then
+  print("**error: " .. result)
+ end
+end
+
+rednet.open(modem)
+
+send(t, "select " .. slot)
+
+-- first calculate how many levels we're going up
+for x = distance, 2, -2 do
+
+ index = index + 1
+
+ -- lay blocks straight ahead
+ for y = 1, x do
+  --send(t, "dig")
+  --wait()
+  send(t, "forward")
+  wait()
+  --send(t, "digDown")
+  --wait()
+  send(t, "placeDown")
+  wait()
+ end
+
+ -- move and turn around
+ if index % 2 == 1 then
+  turn = "left"
+ else
+  turn = "right"
+ end
+
+ send(t, "up")
+ wait()
+ send(t, turn)
+ wait()
+ 
+ send(t, "forward")
+ wait()
+ send(t, turn)
+ wait()
+ --send(t, "forward")
+ --wait()
+
+end
+
+

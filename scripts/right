@@ -1,0 +1,36 @@
+local a = {...}
+local t = tonumber(a[1])
+local detach = false
+local modem = "left"
+local distance = 1
+
+if #a > 1 then
+ distance = tonumber(a[2])
+end
+if #a > 2 and a[2] == "&" then
+ detach = true
+end
+
+send = function(computer, command)
+ rednet.send(computer, command)
+ repeat
+  computer, result = rednet.receive()
+ until computer == t
+ if result ~= "ok" then
+  print("**error: " .. result)
+  return false
+ end
+ return true
+end
+
+rednet.open(modem)
+
+if detach then
+ send(t, "forward " .. distance)
+else
+ for x = 1, distance do
+  if send(t, "forward") == false then
+   return
+  end
+ end
+end

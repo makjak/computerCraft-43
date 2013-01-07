@@ -1,0 +1,36 @@
+local a = {...}
+local modem = "left"
+
+local t = tonumber(a[1])
+local distance = 1
+local slot = 1
+
+if #a > 1 then
+ distance = tonumber(a[2])
+end
+if #a > 2 then
+ slot = tonumber(a[3])
+end
+
+send = function(computer, command)
+ rednet.send(computer, command)
+
+ repeat
+  computer, result = rednet.receive()
+ until result == "ok"
+ if result ~= "ok" then
+  print("**error: " .. result)
+ end
+end
+
+rednet.open(modem)
+
+for x = 1, distance do
+ send(t, "forward")
+ send(t, "placeDown")
+end
+
+for x = 1, distance do
+ send(t, "back")
+end
+

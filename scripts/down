@@ -1,0 +1,4 @@
+
+-- Usage: down turtle-id [distance [&]]
+
+shell.run("tmove", "down", ... )
